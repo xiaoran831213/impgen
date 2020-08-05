@@ -6,51 +6,55 @@
 #' @param x matrix of imputed values;
 #' 
 #' @return a matrix of {0, 1, 2} allele dosage.
-imp.brk <- function(g, x)
+brk.max <- function(g, x)
 {
     stopifnot(all(dim(g) == dim(x)))
     h <- matrix(0L, nrow(x), ncol(x))
     for(j in seq(ncol(g)))
     {
-        h[x[, j] > max(x[g[, j] == 0, j], na.rm=TRUE), j] <- 1L
-        h[x[, j] > max(x[g[, j] == 1, j], na.rm=TRUE), j] <- 2L
+        h[x[, j] > max(x[g[, j] == 0, j], -Inf, na.rm=TRUE), j] <- 1L
+        h[x[, j] > max(x[g[, j] == 1, j], -Inf, na.rm=TRUE), j] <- 2L
     }
     g[is.na(g)] <- h[is.na(g)]
     g
 }
 
-#' Assign allele dosage by closest center values
-#'
-#' @param g matrix of original genotyped in allele dosage format;
-#' @param x matrix of imputed values;
-#' 
-#' @return a matrix of {0, 1, 2} allele dosage.
-imp.ccv <- function(g, x)
+brk.kmn <- function(g, x)
 {
-    ## center values
+    stopifnot(all(dim(g) == dim(x)))
+    h <- matrix(0L, nrow(x), ncol(x))
     for(j in seq(ncol(g)))
     {
-        c0 <- mean(x[g[, j] == 0, j], na.rm=TRUE)
-        c1 <- mean(x[g[, j] == 1, j], na.rm=TRUE)
-        c2 <- mean(x[g[, j] == 2, j], na.rm=TRUE)
-        d0 <- abs(x[, j] - c0)
-        d1 <- abs(x[, j] - c1)
-        d2 <- abs(x[, j] - c2)
-        x[d0 <= d1 && d0 <= d2, j] <- 0
-        x[d1 <= d0 && d1 <= d2, j] <- 1
-        x[d2 <= d0 && d2 <= d1, j] <- 2
+        m <- unlist(tapply(x[, j], g[, j], mean, simplify = FALSE))
+        r <- try(kmeans(x[, j], m)$cluster - 1)
+        if(inherits(r, "try-error"))
+        {
+            print("bad")
+        }
+        h[, j] <- r
     }
-    x
+    g[is.na(g)] <- h[is.na(g)]
+    g
 }
 
-#' Imputation by average
-imp.avg <- function(g)
+brk.pol <- function(g, x)
 {
-    apply(g, 2L, function(x) {x[is.na(x)] <- mean(x, na.rm=TRUE); x})
+    stopifnot(all(dim(g) == dim(x)))
+    h <- matrix(0L, nrow(x), ncol(x))
+    for(j in seq(ncol(g)))
+    {
+        f <- factor(as.integer(g[, j]), c(0, 1, 2))
+        m <- MASS::polr(f ~ x[, j])
+        v <- predict(m, x[, j])
+        h[, j] < as.integer(v) - 1
+    }
+    g[is.na(g)] <- h[is.na(g)]
+    g
 }
+
 
 #' Imputation by random sample
-imp.rnd <- function(g)
+imp.rnd <- function(g, ...)
 {
     apply(g, 2L, function(x)
     {
@@ -61,7 +65,7 @@ imp.rnd <- function(g)
 }
 
 #' Imputation by Mode
-imp.mod <- function(g)
+imp.mod <- function(g, ...)
 {
     apply(g, 2L, function(x)
     {

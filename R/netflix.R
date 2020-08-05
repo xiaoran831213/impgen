@@ -23,13 +23,13 @@ ridge <- function(x, y, la=NULL, nl=10, a=0, ...)
 #' A imitation of Netflix's film recommendation algorithm in genotype.
 #'
 #' @param g matrix of the N by P genotype
-#' @param f the dimensionality latent factor space
+#' @param nf the dimensionality latent factor space
 #' @param la the regularization parameters
 #'
 #' \code{la} can be  a vector of regularization weights in  decending order, an
 #' integer to specify  the number of weights to automatically  try, or NULL for
 #' the default (100 weights).
-imp.gmx <- function(g, f=2, la=0, nl=1, itr=100, thd=1e-7, ...)
+imp.nfx <- function(g, nf=10, la=NULL, nl=20, thd=5e-5, nfold=5, itr=100, ...)
 {
     N <- nrow(g); P <- ncol(g); L <- N * P
 
@@ -40,11 +40,11 @@ imp.gmx <- function(g, f=2, la=0, nl=1, itr=100, thd=1e-7, ...)
     
     xu <- kronecker(Diagonal(N), rep(1, P))
     bu <- rowMeans(g, TRUE)
-    pu <- matrix(rnorm(N * f, 0.2), N, f)
+    pu <- matrix(rnorm(N * nf, 0.2), N, nf)
 
     xi <- kronecker(Diagonal(P), rep(1, N))
     bi <- colMeans(g, TRUE)
-    qi <- Matrix(rnorm(P * f, 0.2), P, f)
+    qi <- Matrix(rnorm(P * nf, 0.2), P, nf)
 
     mu <- -mean(g, na.rm=TRUE)
 
@@ -58,14 +58,14 @@ imp.gmx <- function(g, f=2, la=0, nl=1, itr=100, thd=1e-7, ...)
         re <- ridge(cbind(xu, fu)[ku, ], (ru - xi %*% bi)[ku, ], la=la, nl=nl, ...)
         bu <- unname(re$beta[+seq(N)])
         pu <- unname(re$beta[-seq(N)])
-        pu <- matrix(pu, N, f, TRUE)
+        pu <- matrix(pu, N, nf, TRUE)
 
         ## find bi and qi while fixing bu and pu
         fi <- kronecker(Diagonal(P), pu)
         re <- ridge(cbind(xi, fi)[ki, ], (ri - xu %*% bu)[ki, ], la=la, nl=nl, ...)
         bi <- unname(re$beta[+seq(P)])
         qi <- unname(re$beta[-seq(P)])
-        qi <- matrix(qi, P, f, TRUE)
+        qi <- matrix(qi, P, nf, TRUE)
 
         ## the grand mean
         mu <- re$mu
@@ -82,7 +82,8 @@ imp.gmx <- function(g, f=2, la=0, nl=1, itr=100, thd=1e-7, ...)
         itr <- itr - 1
     }
     dim(hi) <- dim(g)
-    hi
+
+    brk.kmn(g, hi)
 }
 
 im1.gmx <- function(g, f=2, la=0, nl=1, itr=100, thd=1e-7, ...)
