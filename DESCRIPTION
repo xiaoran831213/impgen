@@ -1,0 +1,23 @@
+Package: impgen
+Title: Imputation for Genotypes.
+Version: 0.1.0
+Date: 2020-07-11
+Description: Impute missed genotype calls (i.e., SNPs).
+Authors@R: c(
+  person("Olga", "Vsevolozhskaya", email = "ovs222@@g.uky.edu", role = "aut",
+         comment = c(ORCID = "0000-0001-9376-3645")),
+  person("Dmitri", "Zaykin", email = "zaykin@@gmail.com", role = "aut",
+          comment = c(ORCID = "0000-0002-9444-2859")),
+  person("Xiaoran", "Tong", email = "tongxia1@msu.edu", role = c("aut", "cre"),
+          comment = c(ORCID = "0000-0002-4648-3330")))
+Depends: R (>= 3.1)
+License: GPL (>= 2)
+URL: https://github.com/xiaoran831213/dotgen
+Encoding: UTF-8
+Author: 
+  Olga Vsevolozhskaya [aut] (<https://orcid.org/0000-0001-9376-3645>),
+  Dmitri Zaykin [aut] (<https://orcid.org/0000-0002-9444-2859>),
+  Xiaoran Tong [aut, cre] (<https://orcid.org/0000-0002-4648-3330>)
+Maintainer: Xiaoran Tong <tongxia1@msu.edu>
+LazyData: true
+RoxygenNote: 7.1.1
