@@ -30,8 +30,7 @@ imp.cdn <- function(g)
             next
         x[i, +u] <- D[+u, -u, drop=FALSE] %*% A[-u, -u] %*% x[i, -u]
     }
-    ## x <- sweep(x, 2, a, `+`)
-    x
+    imp.brk(g, x)
 }
 
 
@@ -56,6 +55,5 @@ imp.loo <- function(g)
     A <- chol2inv(chol(D)) # inverse
 
     x <- t(t(x) - A %*% t(x) / diag(A))
-    x <- sweep(x, 2, a, `+`)
-    x
+    imp.brk(g, x)
 }

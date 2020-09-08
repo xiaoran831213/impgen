@@ -29,9 +29,11 @@ ridge <- function(x, y, la=NULL, nl=10, a=0, ...)
 #' \code{la} can be  a vector of regularization weights in  decending order, an
 #' integer to specify  the number of weights to automatically  try, or NULL for
 #' the default (100 weights).
-imp.nfx <- function(g, nf=10, la=NULL, nl=20, thd=5e-5, nfold=5, itr=100, ...)
+imp.nfx <- function(g, nf=NULL, la=NULL, nl=20, thd=5e-5, nfold=5, itr=100, ...)
 {
     N <- nrow(g); P <- ncol(g); L <- N * P
+    if(is.null(nf))
+        nf <- ceiling(sqrt(min(P, N)))
 
     ru <- as.vector(t(g)) # user contains item
     ri <- as.vector(g)    # item contains user

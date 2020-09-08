@@ -25,7 +25,7 @@ brk.kmn <- function(g, x)
     h <- matrix(0L, nrow(x), ncol(x))
     for(j in seq(ncol(g)))
     {
-        m <- unlist(tapply(x[, j], g[, j], mean, simplify = FALSE))
+        m <- unlist(tapply(x[, j], g[, j], median, simplify = FALSE))
         r <- try(kmeans(x[, j], m)$cluster - 1)
         if(inherits(r, "try-error"))
         {
