@@ -1,0 +1,111 @@
+#+AUTHOR: Tong, Xiaoran
+#+TITLE: Covariance of Incomplete Data by EM
+#+PROPERTY: eval:no
+#+OPTIONS: ^{}
+
+Suppose $X$ contains N samples  drawn from M-dimensional multivariate normal of
+mean  $\mu$  and  covariance  $\Sigma$,  that is,
+\begin{equation}
+x_{i.} \sim \mathcal{N}(
+       \boldsymbol{\mu}, \boldsymbol{\Sigma}), \quad i=1 \dots N
+\end{equation}
+
+The naive  estimates of $\mu_j$ and  $\sigma_{jk}$ can be the  mean of complete
+samples in $x_{.j}$, and the covariance  between complete pairs of $x_{.j}$ and
+$x_{.k}$, respectively.
+
+\begin{equation}
+	\mu_j^0 = \frac{\sum_i\delta_{ij} x_{ij}}{\sum_i{\delta_{ij}}},
+	\quad j = 1 \dots M
+\end{equation}
+where $\delta_{ij} = 1$ indicates $x_{ij}$ being observed and 0 otherwise.
+
+\begin{equation}
+\begin{split}
+\sigma_{jk}^0  =& \frac{\sum_i \delta_{ij}(x_{ij} - \bar{x}_{jk})
+	     		     \delta_{ik}(x_{ik} - \bar{x}_{kj})}
+		     {\sum_i \delta_{ij}\delta_{ik}} \\
+\bar{x}_{jk} =& \frac{\sum_i\delta_{ij} x_{ij} \delta_{ik}}
+	     	     {\sum_i\delta_{ij}\delta_{ik}} \\
+\bar{x}_{kj} =& \frac{\sum_i\delta_{ik} x_{ik} \delta_{ij}}
+	     	     {\sum_i\delta_{ik}\delta_{ij}}
+\end{split}
+\end{equation}
+
+Starting with  naively estimated $\boldsymbol{\mu}$  and $\boldsymbol{\Sigma}$,
+one may guess  missing entries using conditional normal theorem. 
+
+For a sample $\boldsymbol{x}_{i.}$, index the  observed part by $p$ and missing
+part by $q$, one have
+\begin{equation}
+\boldsymbol{x}_{i.} = 
+\left[\begin{array}{c}
+	\boldsymbol{x}_{ip} \\
+	\boldsymbol{x}_{iq}
+\end{array}\right] \sim
+		   \mathcal{N}
+		   \left(
+			\left[\begin{array}{c}
+			\boldsymbol{\mu}_p^0 \\
+			\boldsymbol{\mu}_q^0
+		   	\end{array}\right],
+			\left[\begin{array}{cc}
+			\boldsymbol{\Sigma}_{pp}^0 & \boldsymbol{\Sigma}_{pq}^0 \\
+			\boldsymbol{\Sigma}_{qp}^0 & \boldsymbol{\Sigma}_{qq}^0
+		   	\end{array}\right]
+		   \right);
+\end{equation}
+by conditional normal theorem, the missing part follows
+\begin{equation}
+\boldsymbol{x}_{iq} \sim
+   \mathcal{N}\left(
+	\boldsymbol{\mu}_q^0    | \boldsymbol{x}_{ip},
+	\boldsymbol{\Sigma}_q^0 | \boldsymbol{x}_{ip}\right)
+\end{equation}
+it is reasonable to guess the missing entries in $\boldsymbol{x}_{i.}$ with the
+mean of  multivariate normal conditioned  on the  observed entries in  the same
+sample,
+\begin{equation}
+\boldsymbol{x}_{iq}^1
+	 = \boldsymbol{\mu}_q^0 | \boldsymbol{x}_{ip}
+	 = \boldsymbol{\mu}_q^0 + 
+	   \boldsymbol{\Sigma}_{qp}^0
+	   (\boldsymbol{\Sigma}_{pp}^0)^{-1}
+	   (\boldsymbol{x}_{ip} - \boldsymbol{\mu}_p^0);
+\end{equation}
+
+With a full data, one could re-estimates the mean in traditional way
+\begin{equation}
+	\boldsymbol{\mu}^1 = \frac{\sum_i\boldsymbol{x}_{i.}^1}{N}
+\end{equation}
+It seems one could re-estimate the covariance as well,
+\begin{equation}
+	\boldsymbol{V}^1 = \frac{1}{N}\sum_i
+			  (\boldsymbol{x}_{i.}^1 - \boldsymbol{\mu}^1)'
+			  (\boldsymbol{x}_{i.}^1 - \boldsymbol{\mu}^1).
+\end{equation}
+However, the above covariance estimate does  not account for the uncertainty in
+$\boldsymbol{x}_{i.}^1$,  expressed  in  terms  of the  covariance  of  guessed
+entries $\boldsymbol{x}_{iq}^0$ conditioned on observed entires, that is,
+\begin{equation}
+\boldsymbol{\Sigma}_q^0 | \boldsymbol{x}_{ip} =
+		   \boldsymbol{\Sigma}_{qq}^0 - 
+		   \boldsymbol{\Sigma}_{qp}^0
+		   (\boldsymbol{\Sigma}_{pp}^0)^{-1}
+		   \boldsymbol{\Sigma}_{qp}^0.
+\end{equation}
+Instead, get the covariance contributed by each sample $\boldsymbol{x}_{i.}^1$,
+adding the uncertainty caused by guessed values $\boldsymbol{x}_{iq}^1$,
+\begin{equation}
+\begin{split}
+{\sigma_{jk}}^1   & = \frac{1}{N} \sum_i (\sigma_{jk})_i^1 \\
+(\sigma_{jk})_i^1 & = (x_{ij}^1 - \mu_j^1)(x_{ik}^1 - \mu_k^1) + e_{jk} \\
+           e_{jk} & = \begin{cases}
+			(\sigma_q^0|\boldsymbol{x}_{ip})_{(j-|p|)(k-|p|)} & 
+			\mbox{if } j>|p| \mbox{ and } k > |p| \\
+			0 						  &
+			\mbox{otherwise}
+		      \end{cases}
+\end{split}
+\end{equation}
+
