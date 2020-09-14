@@ -4,12 +4,13 @@
 #+OPTIONS: ^{}
 
 Suppose $X$ contains N samples  drawn from M-dimensional multivariate normal of
-mean  $\mu$  and  covariance  $\Sigma$,  that is,
+mean $\mu$ and covariance $\Sigma$, that is,
 \begin{equation}
 x_{i.} \sim \mathcal{N}(
        \boldsymbol{\mu}, \boldsymbol{\Sigma}), \quad i=1 \dots N
 \end{equation}
 
+* Inital Estimate
 The naive  estimates of $\mu_j$ and  $\sigma_{jk}$ can be the  mean of complete
 samples in $x_{.j}$, and the covariance  between complete pairs of $x_{.j}$ and
 $x_{.k}$, respectively.
@@ -18,13 +19,14 @@ $x_{.k}$, respectively.
 	\mu_j^0 = \frac{\sum_i\delta_{ij} x_{ij}}{\sum_i{\delta_{ij}}},
 	\quad j = 1 \dots M
 \end{equation}
-where $\delta_{ij} = 1$ indicates $x_{ij}$ being observed and 0 otherwise.
+where $\delta_{ij} = 1$ indicates that $x_{ij}$ is observed, and 0 otherwise.
 
 \begin{equation}
 \begin{split}
 \sigma_{jk}^0  =& \frac{\sum_i \delta_{ij}(x_{ij} - \bar{x}_{jk})
 	     		     \delta_{ik}(x_{ik} - \bar{x}_{kj})}
-		     {\sum_i \delta_{ij}\delta_{ik}} \\
+		     {\sum_i \delta_{ij}\delta_{ik}},
+		     \quad j = 1 \dots M \\
 \bar{x}_{jk} =& \frac{\sum_i\delta_{ij} x_{ij} \delta_{ik}}
 	     	     {\sum_i\delta_{ij}\delta_{ik}} \\
 \bar{x}_{kj} =& \frac{\sum_i\delta_{ik} x_{ik} \delta_{ij}}
@@ -32,13 +34,14 @@ where $\delta_{ij} = 1$ indicates $x_{ij}$ being observed and 0 otherwise.
 \end{split}
 \end{equation}
 
-Starting with  naively estimated $\boldsymbol{\mu}$  and $\boldsymbol{\Sigma}$,
+* Re-estimate
+Starting with  naively estimated $\boldsymbol{\mu}^0$  and $\boldsymbol{\Sigma}^0$,
 one may guess  missing entries using conditional normal theorem. 
 
 For a sample $\boldsymbol{x}_{i.}$, index the  observed part by $p$ and missing
 part by $q$, one have
 \begin{equation}
-\boldsymbol{x}_{i.} = 
+\textrm{permute}(\boldsymbol{x}_{i.}) = 
 \left[\begin{array}{c}
 	\boldsymbol{x}_{ip} \\
 	\boldsymbol{x}_{iq}
@@ -56,56 +59,90 @@ part by $q$, one have
 		   \right);
 \end{equation}
 by conditional normal theorem, the missing part follows
+<<eqn:cmn>>
 \begin{equation}
 \boldsymbol{x}_{iq} \sim
    \mathcal{N}\left(
-	\boldsymbol{\mu}_q^0    | \boldsymbol{x}_{ip},
-	\boldsymbol{\Sigma}_q^0 | \boldsymbol{x}_{ip}\right)
+	\boldsymbol{\mu}_q^0       | \boldsymbol{x}_{ip},
+	\boldsymbol{\Sigma}_{qq}^0 | \boldsymbol{x}_{ip}\right)
 \end{equation}
-it is reasonable to guess the missing entries in $\boldsymbol{x}_{i.}$ with the
+it is reasonable  to guess the missing entries in  $\boldsymbol{x}_{i.}$ by the
 mean of  multivariate normal conditioned  on the  observed entries in  the same
-sample,
+sample, and pass on the observed entries untouched,
 \begin{equation}
+\begin{split}
+\boldsymbol{x}_{ip}^1
+	 &= \boldsymbol{x}_{ip}; \\
 \boldsymbol{x}_{iq}^1
-	 = \boldsymbol{\mu}_q^0 | \boldsymbol{x}_{ip}
+	&= \boldsymbol{\mu}_q^0 | \boldsymbol{x}_{ip}
 	 = \boldsymbol{\mu}_q^0 + 
 	   \boldsymbol{\Sigma}_{qp}^0
 	   (\boldsymbol{\Sigma}_{pp}^0)^{-1}
-	   (\boldsymbol{x}_{ip} - \boldsymbol{\mu}_p^0);
+	   (\boldsymbol{x}_{ip} - \boldsymbol{\mu}_p^0)
+\end{split}
 \end{equation}
 
-With a full data, one could re-estimates the mean in traditional way
+With completed data $\boldsymbol{x}_{i.}^1$, re-estimates the mean by average
 \begin{equation}
 	\boldsymbol{\mu}^1 = \frac{\sum_i\boldsymbol{x}_{i.}^1}{N}
 \end{equation}
 It seems one could re-estimate the covariance as well,
-\begin{equation}
-	\boldsymbol{V}^1 = \frac{1}{N}\sum_i
-			  (\boldsymbol{x}_{i.}^1 - \boldsymbol{\mu}^1)'
-			  (\boldsymbol{x}_{i.}^1 - \boldsymbol{\mu}^1).
-\end{equation}
-However, the above covariance estimate does  not account for the uncertainty in
-$\boldsymbol{x}_{i.}^1$,  expressed  in  terms  of the  covariance  of  guessed
-entries $\boldsymbol{x}_{iq}^0$ conditioned on observed entires, that is,
-\begin{equation}
-\boldsymbol{\Sigma}_q^0 | \boldsymbol{x}_{ip} =
-		   \boldsymbol{\Sigma}_{qq}^0 - 
-		   \boldsymbol{\Sigma}_{qp}^0
-		   (\boldsymbol{\Sigma}_{pp}^0)^{-1}
-		   \boldsymbol{\Sigma}_{qp}^0.
-\end{equation}
-Instead, get the covariance contributed by each sample $\boldsymbol{x}_{i.}^1$,
-adding the uncertainty caused by guessed values $\boldsymbol{x}_{iq}^1$,
+\begin{align}
+\boldsymbol{V}^1
+	&= \frac{1}{N}\sum_i(\boldsymbol{V})_i^1
+	 = \frac{1}{N}\sum_i
+		 (\boldsymbol{x}_{i.}^1 - \boldsymbol{\mu}^1)'
+		 (\boldsymbol{x}_{i.}^1 - \boldsymbol{\mu}^1); \\
+\end{align}
+However, $(\boldsymbol{V})_i^1$ does not account for the partial uncertainty in
+$\boldsymbol{x}_{i.}^1$  expressed   by  the  covariance  of   missing  entries
+$\boldsymbol{x}_{iq}$ given the observed $\boldsymbol{x}_{ip}$ ([[eqn:cmn][ref]]), that is,
+\begin{align}
+\begin{split}
+\textrm{permute}(\boldsymbol{W})_i^1 
+	&= \left[\begin{array}{cc}
+	   \boldsymbol{0} & \boldsymbol{0} \\
+	   \boldsymbol{0} & (\boldsymbol{W}_{qq})_i^1
+   	\end{array}\right] \\
+(\boldsymbol{W}_{qq})_i^1
+	&= \boldsymbol{\Sigma}_{qq}^0 | \boldsymbol{x}_{ip}
+	 = \boldsymbol{\Sigma}_{qq}^0 - \boldsymbol{\Sigma}_{qp}^0
+	   (\boldsymbol{\Sigma}_{pp}^0)^{-1} \boldsymbol{\Sigma}_{qp}^0;
+\end{split}
+\end{align}
+adding the uncertainty we have
 \begin{equation}
 \begin{split}
-{\sigma_{jk}}^1   & = \frac{1}{N} \sum_i (\sigma_{jk})_i^1 \\
-(\sigma_{jk})_i^1 & = (x_{ij}^1 - \mu_j^1)(x_{ik}^1 - \mu_k^1) + e_{jk} \\
-           e_{jk} & = \begin{cases}
-			(\sigma_q^0|\boldsymbol{x}_{ip})_{(j-|p|)(k-|p|)} & 
-			\mbox{if } j>|p| \mbox{ and } k > |p| \\
-			0 						  &
-			\mbox{otherwise}
-		      \end{cases}
+\boldsymbol{\Sigma}^1
+	&= \frac{1}{N}\sum_i(\boldsymbol{\Sigma})_i^1
+	 = \frac{1}{N}\sum_i(\boldsymbol{V})_i^1 + (\boldsymbol{W})_i^1
 \end{split}
 \end{equation}
 
+* Iteration
+With $\boldsymbol{\mu}^t$ and $\boldsymbol{\Sigma}^t$, one can repeat
+  - complete the missing entries in $\boldsymbol{x}$ given $\boldsymbol{\mu}^t$
+    and $\boldsymbol{\Sigma}^t$ (6), get $\boldsymbol{x}^{t+1}$;
+  - estimate $\boldsymbol{\mu}^{t+1}$    with
+    $\boldsymbol{x}^{t+1}$;
+  - estimate $\boldsymbol{\Sigma}^{t+1}$ with
+    $\boldsymbol{x}^{t+1}$, $\boldsymbol{\mu}^{t+1}$ and
+    $\boldsymbol{\Sigma}^{t+1}$;
+stop if $\boldsymbol{\Sigma}^{t+1}$ is close enough to $\boldsymbol{\Sigma}^t$,
+and report $\boldsymbol{\Sigma}^t$.
+
+* Errors
+The error is the mean  difference of upper-triangle elements between covariance
+estimated  from  incomplete   data  ($\boldsymbol{\Sigma}^t$),  and  covariance
+estimated from the complete data ($\boldsymbol{\Sigma}^x$).
+\begin{equation}
+\begin{split}
+\mu_j^x &= \frac{1}{N} \sum_i x_{ij},
+	 \quad j = 1 \dots M \\
+\sigma_{jk}^x
+	&= \frac{1}{N} \sum_i (x_{ij} - \mu_j)(x_{ik} - \mu_k),
+	 \quad k = 1 \dots M \\
+\textrm{err}
+	&= \sum_{j \le k} |\sigma_{jk}^x - \sigma_{jk}^t| \\
+\end{split}
+\end{equation}
