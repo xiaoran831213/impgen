@@ -146,3 +146,4 @@ estimated from the complete data ($\boldsymbol{\Sigma}^x$).
 	&= \sum_{j \le k} |\sigma_{jk}^x - \sigma_{jk}^t| \\
 \end{split}
 \end{equation}
+[[file:emc_err.pdf][see here]]
