@@ -65,6 +65,8 @@ imp.rnd <- function(g, ...)
 }
 
 #' Imputation by Mode
+#' @param g genotype matrix, N row samples and M column variants
+#' @return complete matrix
 imp.mod <- function(g, ...)
 {
     apply(g, 2L, function(x)
@@ -72,7 +74,7 @@ imp.mod <- function(g, ...)
         i <- which(is.na(x))
         u <- unique(x[-i])
         a <- tabulate(match(x[-i], u))
-        x[i] <- u[a == max(a)]
+        x[i] <- rep(u[a == max(a)], l=length(i))
         x
     })
 }
