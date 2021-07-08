@@ -1,0 +1,8 @@
+## library(glmnet)
+for (R in dir("R", "[.]R$", ful=TRUE))
+    source(R)
+source("gen.R")
+source("utl.R")
+source("sim.R")
+source("mic.R")
+source("emc.R")
